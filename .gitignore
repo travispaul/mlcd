@@ -1,0 +1,3 @@
+mlcd
+*.o
+.gdbinit
