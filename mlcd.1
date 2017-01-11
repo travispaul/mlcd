@@ -1,8 +1,47 @@
-.Dd December 5, 2016 
+.Dd Jan 8, 2016
 .Dt MLCD 1
 .Os
 .Sh NAME
 .Nm mlcd
-.Nd Utility for drawing images on a Maple LCD (Dreamcast VMU Display). 
+.Nd Maple LCD utility
 .Sh SYNOPSIS
 .Nm
+.Op Fl a
+.Op Fl b
+.Op Fl c
+.Op Fl d
+.Ar image
+.Sh DESCRIPTION
+.Nm
+Converts a bitmap, jpg, gif, or png
+.Ar image
+into various formats for use with a 48x30 monochrome Maple LCD display 
+including the binary format required to update the LCD screen of a
+Visual Memory Unit attached to the system.
+.Pp
+The options are:
+.Bl -tag -width Ds
+.It Fl a
+Print asm code that can be used for VMU games.
+.It Fl b
+Print an ascii binary representation of the image using 1s and 0s.
+.It Fl c
+Print a C data sctructure that can be embedded into the mlcd(4) driver.
+.It Fl d
+Prints the raw binary data that can be written to an mlcd device.
+.El
+.Sh IMAGE FORMATS
+mlcd will read the image file and convert every black pixel in the source image to a corresponding pixel/bit in the output.  The recommended format is a 24bit BMP with only white and black pixels however, stbi also suports the following formats:
+.Bl -tag -width Ds
+.It BMP
+non-1bpp, non-RLE
+.It PNG
+8-bit only
+.It GIF
+(*comp always reports as 4-channel)
+.It JPEG
+baseline (no JPEG progressive)
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr mlcd 4
