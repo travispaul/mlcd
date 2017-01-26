@@ -90,13 +90,18 @@ main(int argc, char **argv)
 			if (count == 8) {
 				switch (format) {
 					case 'a': // asm
-						printf("%%%c%c%c%c%c%c%c%c,", BYTE_TO_BINARY(total), total);
+						printf("%%%c%c%c%c%c%c%c%c,", BYTE_TO_BINARY(total));
 						break;
 					case 'b': // acii binary
-						printf("%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total), total);
+						printf("%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total));
 						break;
 					case 'c': // C code
-						printf("0x%02x, ", total);
+						printf("0x%02x", total);
+						if (ny == 31 && nx == 47) {
+							printf("\n};\n");
+						} else {
+							printf(", ");
+						}
 						break;
 					case 'd': // binary data
 						putc(total, stdout);
@@ -105,11 +110,10 @@ main(int argc, char **argv)
 				count = total = 0;
 			}
 		}
-
+		
 		if (format != 'd') printf("\n");
 	}
 
-	if (format == 'c') printf("};\n");
 }
 
 static void
