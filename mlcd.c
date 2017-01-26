@@ -90,7 +90,10 @@ main(int argc, char **argv)
 			if (count == 8) {
 				switch (format) {
 					case 'a': // asm
-						printf("%%%c%c%c%c%c%c%c%c,", BYTE_TO_BINARY(total));
+						printf("%%%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total));
+						if (nx != 47) {
+							printf(",");
+						}
 						break;
 					case 'b': // acii binary
 						printf("%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total));
@@ -110,7 +113,6 @@ main(int argc, char **argv)
 				count = total = 0;
 			}
 		}
-		
 		if (format != 'd') printf("\n");
 	}
 
