@@ -92,7 +92,7 @@ $ ./mlcd -b mlcd.bmp
 ```
 
 ### C code
-Can be used to replace the default boot image in the mlcd NetBSD driver.
+Can be used to replace the default boot image in the [mlcd](https://nxr.netbsd.org/xref/src/sys/arch/dreamcast/dev/maple/mlcd.c#190) NetBSD driver.
 
 ```
 $ ./mlcd -c mlcd.bmp
