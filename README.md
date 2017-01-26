@@ -14,7 +14,7 @@ $ mlcd -d img.bmp > /dev/mlcd0.0
 
 
 ### asm
-Could potentially be used for VMS games.
+Could be used for VMS games.
 
 ```
 $ ./mlcd -a mlcd.bmp
@@ -52,8 +52,8 @@ $ ./mlcd -a mlcd.bmp
 .byte %00000000,%00001000,%00000000,%00000000,%00000000,%00000000,
 ```
 
-### binary (1s and 0s)
-Useful for preview.
+### ASCII binary 
+Prints 1s and 0s for pixels, useful for preview.
 
 ```
 $ ./mlcd -b mlcd.bmp
@@ -128,7 +128,7 @@ static const char initimg48x32[192] = {
 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x08, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x08, 0x00, 0x00, 0x00, 0x00,
+0x00, 0x08, 0x00, 0x00, 0x00, 0x00
 };
 ```
 
