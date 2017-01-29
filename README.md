@@ -11,6 +11,8 @@ $ mlcd -d img.bmp > /dev/mlcd0.0
 ## Examples
 
 ![MLCD](mlcd.bmp)
+![MLCD](example.gif)
+![MLCD](example.bmp)
 
 
 ### asm
