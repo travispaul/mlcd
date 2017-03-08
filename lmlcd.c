@@ -10,12 +10,18 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "bit_array.h"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0') 
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-
-BIT_ARRAY *frame = NULL;
 
 #define WIDTH 48
 #define HEIGHT 32
@@ -33,10 +39,58 @@ static const struct constant mlcd_constant[] = {
 	{ NULL,			0 }
 };
 
+typedef struct bit_array {
+  uint8_t * bytes;
+  uint16_t num_of_bits;
+  uint8_t num_of_bytes;
+} bit_array;
+
+bit_array *frame = NULL;
+
+bit_array *
+bit_array_create(uint16_t nbits) {
+  bit_array* b = malloc(sizeof(bit_array));
+  if(b != NULL) {
+    b->num_of_bits = nbits;
+    b->num_of_bytes = nbits / 8;
+    b->bytes = malloc(b->num_of_bytes);
+    if(b->bytes == NULL) {
+      free(b);
+      return NULL;
+    }
+    return b;
+  }
+  return NULL;
+}
+
+static void
+bit_array_clear_all(bit_array *b) {
+  memset(b->bytes, 0, b->num_of_bytes);
+}
+
+static void
+bit_array_set_all(bit_array *b) {
+  memset(b->bytes, 0xFF, b->num_of_bytes);
+}
+
+static void 
+bit_array_print(bit_array *b, FILE* fout) {
+  int i;
+  for (i = 0; i < b->num_of_bytes; i++) {
+    fprintf(fout, "%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(b->bytes[i]));
+  }
+}
+
+static void
+bit_array_set(bit_array *b, uint16_t bit) {
+  b->bytes[bit/8] |= 1UL << (7 - bit % 8);
+}
+
+
 static void
 _point(int x, int y)
 {
-	bit_array_set(frame, (y * 48) + x);
+	bit_array_set(frame, (y * WIDTH) + x);
 }
 
 static int
@@ -53,7 +107,7 @@ _line(int x0, int y0, int x1, int y1)
 	int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1; 
 	int err = (dx>dy ? dx : -dy)/2, e2;
 	for(;;){
-		bit_array_set(frame, (y0 * 48) + x0);
+		bit_array_set(frame, (y0 * WIDTH) + x0);
 		if (x0==x1 && y0==y1) break;
 		e2 = err;
 		if (e2 >-dx) { err -= dy; x0 += sx; }
@@ -166,24 +220,22 @@ mlcd_dump(lua_State *L)
 static int
 mlcd_save(lua_State *L)
 {
-	char str[(WIDTH * HEIGHT) + 1];
 	unsigned char data[((WIDTH * HEIGHT) * 3) + 1];
 	const char *path;
-	int ny;
-	int nx;
-	int offset;
 	size_t length;
-
+	int byte;
+	int bit;
+	int offset;
+	int current;
 	path = lua_tolstring (L, 1, &length);
 	
-	bit_array_to_str(frame, str);
-
-	for (ny = 0; ny < HEIGHT; ny++) {
-		for (nx = 0; nx < WIDTH; nx++) {
-			offset = (nx + ny * WIDTH) * 3 - 1;
-			data[offset + 1] = (str[nx + ny * WIDTH] == '0') ? 255 : 0;
-			data[offset + 2] = (str[nx + ny * WIDTH] == '0') ? 255 : 0;
-			data[offset + 3] = (str[nx + ny * WIDTH] == '0') ? 255 : 0;
+	for (byte = 0; byte < frame->num_of_bytes; byte++) {
+		for (bit = 0; bit < 8; bit++) {
+			offset = ((byte * 8) + bit) * 3 - 1;
+			current = frame->bytes[byte] >> (7 - bit) & 1;
+			data[offset + 1] = (current) ? 0 : 255;
+			data[offset + 2] = (current) ? 0 : 255;
+			data[offset + 3] = (current) ? 0 : 255;
 		}
 	}
 
@@ -217,14 +269,14 @@ mlcd_draw(lua_State *L)
 		printf("no draw fn"); // XXX
 	}
 
-	for (;;) {
+	//for (;;) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, draw);
 		lua_pcall(L, 0, 1, 0);
 		if (path) {
-			bit_array_save(frame, f, 1);
+			fwrite(frame->bytes, 1, frame->num_of_bytes, f);
 		}
-		sleep(1);
-	}
+		//sleep(1);
+	//}
 
     return 0;
 }
@@ -246,7 +298,8 @@ luaopen_mlcd(lua_State* L)
 		{ NULL,				NULL }
 	};
 
-	frame = bit_array_create(48 * 32);
+	frame = bit_array_create(WIDTH * HEIGHT);
+	
 	luaL_newlib(L, mlcd_methods);
 
 	for (int n = 0; mlcd_constant[n].name != NULL; n++) {
