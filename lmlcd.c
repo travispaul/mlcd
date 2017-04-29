@@ -10,21 +10,10 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#define BYTE_TO_ASCII(byte)  \
-	(byte & 0x80 ? '1' : '0'), \
-	(byte & 0x40 ? '1' : '0'), \
-	(byte & 0x20 ? '1' : '0'), \
-	(byte & 0x10 ? '1' : '0'), \
-	(byte & 0x08 ? '1' : '0'), \
-	(byte & 0x04 ? '1' : '0'), \
-	(byte & 0x02 ? '1' : '0'), \
-	(byte & 0x01 ? '1' : '0') 
+#include "common.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-
-#define WIDTH 48
-#define HEIGHT 32
 
 int luaopen_mlcd(lua_State*);
 
@@ -34,8 +23,8 @@ struct constant {
 };
 
 static const struct constant mlcd_constant[] = {
-	{ "HEIGHT",		HEIGHT },
-	{ "WIDTH",		WIDTH },
+	{ "HEIGHT",		MLCD_HEIGHT },
+	{ "WIDTH",		MLCD_WIDTH },
 	{ NULL,			0 }
 };
 
@@ -89,7 +78,7 @@ bit_array_set(bit_array *b, uint16_t bit) {
 static void
 _point(int x, int y)
 {
-	bit_array_set(frame, (y * WIDTH) + x);
+	bit_array_set(frame, (y * MLCD_WIDTH) + x);
 }
 
 static int
@@ -106,7 +95,7 @@ _line(int x0, int y0, int x1, int y1)
 	int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1; 
 	int err = (dx>dy ? dx : -dy)/2, e2;
 	for(;;){
-		bit_array_set(frame, (y0 * WIDTH) + x0);
+		bit_array_set(frame, (y0 * MLCD_WIDTH) + x0);
 		if (x0==x1 && y0==y1) break;
 		e2 = err;
 		if (e2 >-dx) { err -= dy; x0 += sx; }
@@ -219,7 +208,7 @@ mlcd_dump(lua_State *L)
 static int
 mlcd_save(lua_State *L)
 {
-	unsigned char data[((WIDTH * HEIGHT) * 3) + 1];
+	unsigned char data[((MLCD_WIDTH * MLCD_HEIGHT) * 3) + 1];
 	const char *path;
 	size_t length;
 	int byte;
@@ -238,7 +227,7 @@ mlcd_save(lua_State *L)
 		}
 	}
 
-	stbi_write_bmp(path, WIDTH, HEIGHT, 3, data);
+	stbi_write_bmp(path, MLCD_WIDTH, MLCD_HEIGHT, 3, data);
 
 	return 0;
 }
@@ -299,7 +288,7 @@ luaopen_mlcd(lua_State* L)
 		{ NULL,				NULL }
 	};
 
-	frame = bit_array_create(WIDTH * HEIGHT);
+	frame = bit_array_create(MLCD_WIDTH * MLCD_HEIGHT);
 	
 	luaL_newlib(L, mlcd_methods);
 

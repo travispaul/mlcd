@@ -1,19 +1,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define BYTE_TO_ASCII(byte)  \
-	(byte & 0x80 ? '1' : '0'), \
-	(byte & 0x40 ? '1' : '0'), \
-	(byte & 0x20 ? '1' : '0'), \
-	(byte & 0x10 ? '1' : '0'), \
-	(byte & 0x08 ? '1' : '0'), \
-	(byte & 0x04 ? '1' : '0'), \
-	(byte & 0x02 ? '1' : '0'), \
-	(byte & 0x01 ? '1' : '0') 
+#include "common.h"
 
-#define STBI_NO_HDR
-#define STBI_TYPE_SPECIFIC_FUNCTIONS
-#define STBI_SMALL_STACK
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.c"
 
@@ -60,19 +49,22 @@ main(int argc, char **argv)
 		usage();
 	}
 
-	data = stbi_load(argv[0], &x, &y, &n, 3);
+	data = (unsigned char *)stbi_load(argv[0], &x, &y, &n, 3);
 
 	if (!data) {
 		(void)fprintf(stderr, "stbi_load: %s\n", stbi_failure_reason());
 		exit(1);
 	}
 
-	if (x != 48 || y != 32) {
-		(void)fprintf(stderr, "image must be 48x32\n");
+	if (x != MLCD_WIDTH || y != MLCD_HEIGHT) {
+		(void)fprintf(stderr, "image must be %dx%d\n",
+			MLCD_WIDTH, MLCD_HEIGHT);
 		exit(1);
 	}
 
-	if (format == 'c') printf("static const char initimg48x32[192] = {\n");
+	if (format == 'c')
+		printf("static const char initimg%dx%d[%d] = {\n",
+			MLCD_WIDTH, MLCD_HEIGHT, MLCD_BYTES);
 
 	for (ny = 0; ny < y; ny++) {
 
@@ -89,16 +81,21 @@ main(int argc, char **argv)
 
 			if (count == 8) {
 				switch (format) {
-					case 'a': // asm
-						printf("%%%c%c%c%c%c%c%c%c", BYTE_TO_ASCII(total));
+					/* asm */
+					case 'a':
+						printf("%%%c%c%c%c%c%c%c%c",
+							BYTE_TO_ASCII(total));
 						if (nx != 47) {
 							printf(",");
 						}
 						break;
-					case 'b': // acii binary
-						printf("%c%c%c%c%c%c%c%c", BYTE_TO_ASCII(total));
+					/* Each byte to ASCII */
+					case 'b':
+						printf("%c%c%c%c%c%c%c%c",
+							BYTE_TO_ASCII(total));
 						break;
-					case 'c': // C code
+					/* sys/arch/dreamcast/dev/maple/mlcd.c */
+					case 'c':
 						printf("0x%02x", total);
 						if (ny == 31 && nx == 47) {
 							printf("\n};\n");
@@ -106,7 +103,8 @@ main(int argc, char **argv)
 							printf(", ");
 						}
 						break;
-					case 'd': // binary data
+					/* Raw data */
+					case 'd': 
 						putc(total, stdout);
 						break;
 				}
@@ -115,7 +113,6 @@ main(int argc, char **argv)
 		}
 		if (format != 'd') printf("\n");
 	}
-
 }
 
 static void

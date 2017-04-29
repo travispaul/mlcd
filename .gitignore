@@ -1,3 +1,5 @@
 mlcd
 *.o
+*.so
 .gdbinit
+mlcd.html1
