@@ -10,15 +10,15 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
+#define BYTE_TO_ASCII(byte)  \
+	(byte & 0x80 ? '1' : '0'), \
+	(byte & 0x40 ? '1' : '0'), \
+	(byte & 0x20 ? '1' : '0'), \
+	(byte & 0x10 ? '1' : '0'), \
+	(byte & 0x08 ? '1' : '0'), \
+	(byte & 0x04 ? '1' : '0'), \
+	(byte & 0x02 ? '1' : '0'), \
+	(byte & 0x01 ? '1' : '0') 
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -34,58 +34,57 @@ struct constant {
 };
 
 static const struct constant mlcd_constant[] = {
-	{ "HEIGHT",			HEIGHT },
-	{ "WIDTH",			WIDTH },
+	{ "HEIGHT",		HEIGHT },
+	{ "WIDTH",		WIDTH },
 	{ NULL,			0 }
 };
 
 typedef struct bit_array {
-  uint8_t * bytes;
-  uint16_t num_of_bits;
-  uint8_t num_of_bytes;
+	uint8_t * bytes;
+	uint16_t num_of_bits;
+	uint8_t num_of_bytes;
 } bit_array;
 
 bit_array *frame = NULL;
 
 bit_array *
 bit_array_create(uint16_t nbits) {
-  bit_array* b = malloc(sizeof(bit_array));
-  if(b != NULL) {
-    b->num_of_bits = nbits;
-    b->num_of_bytes = nbits / 8;
-    b->bytes = malloc(b->num_of_bytes);
-    if(b->bytes == NULL) {
-      free(b);
-      return NULL;
-    }
-    return b;
-  }
-  return NULL;
+	bit_array* b = malloc(sizeof(bit_array));
+	if (b != NULL) {
+		b->num_of_bits = nbits;
+		b->num_of_bytes = nbits / 8;
+		b->bytes = malloc(b->num_of_bytes);
+		if (b->bytes == NULL) {
+			free(b);
+			return NULL;
+		}
+		return b;
+	}	
+	return NULL;
 }
 
 static void
 bit_array_clear_all(bit_array *b) {
-  memset(b->bytes, 0, b->num_of_bytes);
+	memset(b->bytes, 0, b->num_of_bytes);
 }
 
 static void
 bit_array_set_all(bit_array *b) {
-  memset(b->bytes, 0xFF, b->num_of_bytes);
+	memset(b->bytes, 0xFF, b->num_of_bytes);
 }
 
 static void 
 bit_array_print(bit_array *b, FILE* fout) {
-  int i;
-  for (i = 0; i < b->num_of_bytes; i++) {
-    fprintf(fout, "%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(b->bytes[i]));
-  }
+	int i;
+	for (i = 0; i < b->num_of_bytes; i++) {
+		fprintf(fout, "%c%c%c%c%c%c%c%c", BYTE_TO_ASCII(b->bytes[i]));
+	}
 }
 
 static void
 bit_array_set(bit_array *b, uint16_t bit) {
-  b->bytes[bit/8] |= 1UL << (7 - bit % 8);
+	b->bytes[bit/8] |= 1UL << (7 - bit % 8);
 }
-
 
 static void
 _point(int x, int y)
@@ -163,31 +162,31 @@ mlcd_circle(lua_State *L)
 	int y0 = luaL_checkinteger(L, 2);
 	int r = luaL_checkinteger(L, 3);
 
-    int x = r;
-    int y = 0;
-    int err = 0;
+	int x = r;
+	int y = 0;
+	int err = 0;
 
-    while (x >= y) {
+	while (x >= y) {
 
-        _point(x0 + x, y0 + y);
-        _point(x0 + y, y0 + x);
-        _point(x0 - y, y0 + x);
-        _point(x0 - x, y0 + y);
-        _point(x0 - x, y0 - y);
-        _point(x0 - y, y0 - x);
-        _point(x0 + y, y0 - x);
-        _point(x0 + x, y0 - y);
+		_point(x0 + x, y0 + y);
+		_point(x0 + y, y0 + x);
+		_point(x0 - y, y0 + x);
+		_point(x0 - x, y0 + y);
+		_point(x0 - x, y0 - y);
+		_point(x0 - y, y0 - x);
+		_point(x0 + y, y0 - x);
+		_point(x0 + x, y0 - y);
 
-        if (err <= 0) {
-            y += 1;
-            err += 2*y + 1;
-        }
+		if (err <= 0) {
+			y += 1;
+			err += 2*y + 1;
+		}
 
-        if (err > 0) {
-            x -= 1;
-            err -= 2*x + 1;
-        }
-    }
+		if (err > 0) {
+			x -= 1;
+			err -= 2*x + 1;
+		}
+	}
 	return 0;
 }
 
@@ -195,7 +194,7 @@ static int
 mlcd_clear(lua_State *L)
 {
 	bit_array_clear_all(frame);
-    return 0;
+	return 0;
 }
 
 static int
@@ -206,15 +205,15 @@ mlcd_background(lua_State *L)
 	} else {
 		bit_array_clear_all(frame);
 	}
-    return 0;
+	return 0;
 }
 
 static int
 mlcd_dump(lua_State *L)
 {
-    bit_array_print(frame, stdout);
-    fputc('\n', stdout);
-    return 0;
+	bit_array_print(frame, stdout);
+	fputc('\n', stdout);
+	return 0;
 }
 
 static int
@@ -239,9 +238,9 @@ mlcd_save(lua_State *L)
 		}
 	}
 
-    stbi_write_bmp(path, WIDTH, HEIGHT, 3, data);
+	stbi_write_bmp(path, WIDTH, HEIGHT, 3, data);
 
-    return 0;
+	return 0;
 }
 
 static int
@@ -259,26 +258,28 @@ mlcd_draw(lua_State *L)
 
 		if (f == NULL) { // XXX
 			printf("unabled to open file");
+			return 0;
 		}
 	}
 
 	if (lua_isfunction(L, 2)) {
-	    lua_pushvalue(L, 2);
-	    draw = luaL_ref(L, LUA_REGISTRYINDEX);
+		lua_pushvalue(L, 2);
+		draw = luaL_ref(L, LUA_REGISTRYINDEX);
 	} else {
 		printf("no draw fn"); // XXX
+		return 0;
 	}
 
-	//for (;;) {
+	for (;;) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, draw);
 		lua_pcall(L, 0, 1, 0);
 		if (path) {
 			fwrite(frame->bytes, 1, frame->num_of_bytes, f);
 		}
-		//sleep(1);
-	//}
+		sleep(1);
+	}
 
-    return 0;
+	return 0;
 }
 
 int
@@ -287,11 +288,11 @@ luaopen_mlcd(lua_State* L)
 	static const struct luaL_Reg mlcd_methods[] = {
 		{ "point",			mlcd_point },
 		{ "line",			mlcd_line },
-		{ "triangle",		mlcd_triangle },
+		{ "triangle",			mlcd_triangle },
 		{ "quad",			mlcd_quad },
 		{ "circle",			mlcd_circle },
 		{ "clear",			mlcd_clear },
-		{ "background",		mlcd_background },
+		{ "background",			mlcd_background },
 		{ "dump",			mlcd_dump },
 		{ "save",			mlcd_save },
 		{ "draw",			mlcd_draw },

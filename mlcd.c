@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define BYTE_TO_BINARY(byte)  \
-  (byte & 0x80 ? '1' : '0'), \
-  (byte & 0x40 ? '1' : '0'), \
-  (byte & 0x20 ? '1' : '0'), \
-  (byte & 0x10 ? '1' : '0'), \
-  (byte & 0x08 ? '1' : '0'), \
-  (byte & 0x04 ? '1' : '0'), \
-  (byte & 0x02 ? '1' : '0'), \
-  (byte & 0x01 ? '1' : '0') 
+#define BYTE_TO_ASCII(byte)  \
+	(byte & 0x80 ? '1' : '0'), \
+	(byte & 0x40 ? '1' : '0'), \
+	(byte & 0x20 ? '1' : '0'), \
+	(byte & 0x10 ? '1' : '0'), \
+	(byte & 0x08 ? '1' : '0'), \
+	(byte & 0x04 ? '1' : '0'), \
+	(byte & 0x02 ? '1' : '0'), \
+	(byte & 0x01 ? '1' : '0') 
 
 #define STBI_NO_HDR
 #define STBI_TYPE_SPECIFIC_FUNCTIONS
@@ -90,13 +90,13 @@ main(int argc, char **argv)
 			if (count == 8) {
 				switch (format) {
 					case 'a': // asm
-						printf("%%%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total));
+						printf("%%%c%c%c%c%c%c%c%c", BYTE_TO_ASCII(total));
 						if (nx != 47) {
 							printf(",");
 						}
 						break;
 					case 'b': // acii binary
-						printf("%c%c%c%c%c%c%c%c", BYTE_TO_BINARY(total));
+						printf("%c%c%c%c%c%c%c%c", BYTE_TO_ASCII(total));
 						break;
 					case 'c': // C code
 						printf("0x%02x", total);

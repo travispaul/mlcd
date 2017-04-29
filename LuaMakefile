@@ -1,0 +1,6 @@
+# To cross compile for Dreamcast:
+#   /path/to/tools/bin/nbmake-dreamcast -f LuaMakefile
+LUA_MODULES=		mlcd
+LUA_SRCS.mlcd=		lmlcd.c
+
+.include <bsd.lua.mk>

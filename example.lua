@@ -1,5 +1,5 @@
 -- lua example.lua | fold -bw48
-package.cpath = package.cpath .. ';?.so;?.dylib;?.dll'
+package.cpath = package.cpath .. ';./?.so;?.dylib;?.dll'
 
 local mlcd = require 'mlcd'
 local t = 0.0;
@@ -8,7 +8,7 @@ function round(num)
   return math.floor(num+0.5)
 end
 
-mlcd.draw("test.data", function ()
+mlcd.draw("/dev/mlcd0.0", function ()
 	
 	mlcd.clear()
 
@@ -36,5 +36,8 @@ mlcd.draw("test.data", function ()
 		t = t + ((math.pi * 2) / mlcd.WIDTH) + 0.002;
 	end
 
+    -- mlcd.save('test1.bmp');
+
 	mlcd.dump();
+
 end)
