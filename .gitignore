@@ -3,3 +3,4 @@ mlcd
 *.so
 .gdbinit
 mlcd.html1
+*.dylib
