@@ -1,5 +1,5 @@
 # mlcd
-Utility and Lua module for displaying graphics on a Dreamcast Visual Memory Unit's LCD (Maple LCD).
+Command line utility and Lua module for drawing graphics to a Dreamcast Visual Memory Unit's LCD (Maple LCD).
 
 ## Usage
 
