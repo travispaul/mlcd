@@ -156,26 +156,18 @@ $ mlcd -a mlcd.bmp
 
 ### Tips and Tricks
 
-#### Draw directly to 
-
-#### Clear screen:
+#### Clear screen
 ```
 $ dd if=/dev/zero of=/dev/mlcd0.0 count=192
 ```
 
-#### Draw random pixels:
+#### Draw random pixels
 ```
-$ dd if=/dev/urandom of=/dev/mlcd0.0 count=192
-```
-
-#### Draw copy a raw file
-```
-$ 
 $ dd if=/dev/urandom of=/dev/mlcd0.0 count=192
 ```
 
 #### Cross compile on NetBSD
-You can build the tools using [build.sh](https://www.netbsd.org/docs/guide/en/chap-build.html#chap-build-tools)
+You can build the tools using [build.sh](https://www.netbsd.org/docs/guide/en/chap-build.html#chap-build-tools).
 ```
 $ /path/to/tools/bin/nbmake-dreamcast 
 ```
