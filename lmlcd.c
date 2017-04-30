@@ -36,6 +36,11 @@ typedef struct bit_array {
 
 bit_array *frame = NULL;
 
+static void
+bit_array_clear_all(bit_array *b) {
+	memset(b->bytes, 0, b->num_of_bytes);
+}
+
 bit_array *
 bit_array_create(uint16_t nbits) {
 	bit_array* b = malloc(sizeof(bit_array));
@@ -47,14 +52,10 @@ bit_array_create(uint16_t nbits) {
 			free(b);
 			return NULL;
 		}
+		bit_array_clear_all(b);
 		return b;
 	}	
 	return NULL;
-}
-
-static void
-bit_array_clear_all(bit_array *b) {
-	memset(b->bytes, 0, b->num_of_bytes);
 }
 
 static void
@@ -238,34 +239,51 @@ mlcd_draw(lua_State *L)
 	size_t length;
 	const char *path;
 	int draw;
+	int frames;
 	FILE *f;
+	int mssleep;
 
 	path = lua_tolstring (L, 1, &length);
-
-	if (path) {
-		f = fopen(path, "a");
-
-		if (f == NULL) { // XXX
-			printf("unabled to open file");
-			return 0;
-		}
-	}
 
 	if (lua_isfunction(L, 2)) {
 		lua_pushvalue(L, 2);
 		draw = luaL_ref(L, LUA_REGISTRYINDEX);
 	} else {
-		printf("no draw fn"); // XXX
+		printf("no draw fn");
 		return 0;
+	}
+
+	frames = -1;
+	if (lua_isnumber(L, 3)) {
+		frames = luaL_checkinteger(L, 3);
+	}
+
+	mssleep = -1;
+	if (lua_isnumber(L, 4)) {
+		mssleep = luaL_checkinteger(L, 4);
 	}
 
 	for (;;) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, draw);
 		lua_pcall(L, 0, 1, 0);
 		if (path) {
-			fwrite(frame->bytes, 1, frame->num_of_bytes, f);
+			f = fopen(path, "a"); // XXX
+			if (f == NULL) { 
+				printf("unable to open file");
+				return 0;
+			}
+			if(fwrite(frame->bytes, 1, frame->num_of_bytes, f) != MLCD_BYTES) {
+				printf("did not write all bytes\n");
+			}
+			fclose(f); // XXX
 		}
-		sleep(1);
+		if (frames != -1) {
+			frames -= 1;
+			if (!frames) {
+				break;
+			}
+		}
+		usleep((mssleep == -1) ? 10000 : mssleep);
 	}
 
 	return 0;
@@ -289,7 +307,7 @@ luaopen_mlcd(lua_State* L)
 	};
 
 	frame = bit_array_create(MLCD_WIDTH * MLCD_HEIGHT);
-	
+
 	luaL_newlib(L, mlcd_methods);
 
 	for (int n = 0; mlcd_constant[n].name != NULL; n++) {

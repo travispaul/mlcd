@@ -1,8 +1,11 @@
--- lua example.lua | fold -bw48
+-- Animated sin wave 
 package.cpath = package.cpath .. ';./?.so;?.dylib;?.dll'
 
 local mlcd = require 'mlcd'
 local t = 0.0;
+local x1 = 0
+local y1 = 0
+local i = 0
 
 function round(num)
   return math.floor(num+0.5)
@@ -12,32 +15,26 @@ mlcd.draw("/dev/mlcd0.0", function ()
 	
 	mlcd.clear()
 
-	mlcd.triangle(1, 6, 12, 1, 23, 6);
-
-	mlcd.point(42, 2);
-
-	mlcd.point(46, 2);
-
-	mlcd.line(42, 4, 46, 4);
-
-	mlcd.quad(3, 8, 12, 8, 12, 12, 3, 12);
-
-	mlcd.quad(16, 9, 19, 9, 19, 11, 16, 11);
-
-	mlcd.circle(32, 24, 5);
+	x1 = x1 + 1
+	if x1 == mlcd.WIDTH then
+		x1 = 0
+		if y1 == mlcd.HEIGHT then
+			y1 = 0
+		else
+			y1 = y1 + 1
+		end
+	end
 
 	for x = 0,47 do
 		local y = round(16 + math.sin(t) * 8)
+
 		if x % 2 == 0 and x > 12 and x < 36 then
-			mlcd.line(x, y, x, 16);
+			mlcd.line(x, y, x, mlcd.HEIGHT/2);
 	    	else
 	    		mlcd.point(x, y);
 		end
+
 		t = t + ((math.pi * 2) / mlcd.WIDTH) + 0.002;
 	end
-
-    -- mlcd.save('test1.bmp');
-
-	mlcd.dump();
-
+	i = i + 0
 end)
