@@ -13,15 +13,14 @@ See [test/example.lua](test/example.lua) for using the lua module.
 ```lua
 -- Draw a point through the center of the display
 local mlcd = require 'mlcd'
-local x = mlcd.HEIGHT/2
-local i = 0
+local x = 0
 mlcd.draw("/dev/mlcd0.0", function ()
-	mlcd.clear()
-	mlcd.point(mlcd.HEIGHT/2, i)
-	i = i + 1
-	if i == mlcd.WIDTH then
-		i = 0
-	end
+        mlcd.clear()
+        mlcd.point(x, mlcd.HEIGHT / 2)
+        x = x + 1
+        if x == mlcd.WIDTH then
+                x = 0
+        end
 end)
 ```
 
