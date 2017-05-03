@@ -236,8 +236,8 @@ mlcd_save(lua_State *L)
 static int
 mlcd_draw(lua_State *L)
 {
-	size_t length;
 	const char *path;
+	size_t length;
 	int draw;
 	int frames;
 	FILE *f;
@@ -285,7 +285,16 @@ mlcd_draw(lua_State *L)
 		}
 		usleep((mssleep == -1) ? 10000 : mssleep);
 	}
+	return 0;
+}
 
+static int
+mlcd_text(lua_State *L)
+{
+	const char *str;
+	size_t length;
+	str = lua_tolstring (L, 1, &length);
+	printf("String: %.*s", (int)length, str);
 	return 0;
 }
 
@@ -303,6 +312,7 @@ luaopen_mlcd(lua_State* L)
 		{ "dump",			mlcd_dump },
 		{ "save",			mlcd_save },
 		{ "draw",			mlcd_draw },
+		{ "text",			mlcd_text },
 		{ NULL,				NULL }
 	};
 
