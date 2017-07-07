@@ -11,7 +11,7 @@ $ mlcd -d img.bmp > /dev/mlcd0.0
 See [test/example.lua](test/example.lua) for using the lua module.
 
 ```lua
--- Draw a point through the center of the display
+-- Draw a line through the center of the display
 local mlcd = require 'mlcd'
 local x = 0
 mlcd.draw("/dev/mlcd0.0", function ()
