@@ -1,4 +1,6 @@
 # mlcd
+![MLCD](test/example.gif)
+
 Command line utility and Lua module for drawing graphics to a Dreamcast Visual Memory Unit's LCD (Maple LCD).
 
 ## Usage
@@ -32,7 +34,6 @@ $ lua example.lua
 ## Examples
 
 ![MLCD](test/mlcd.bmp)
-![MLCD](test/example.gif)
 ![MLCD](test/example.bmp)
 
 ### ASCII binary 
@@ -115,8 +116,8 @@ static const char initimg48x32[192] = {
 };
 ```
 
-### asm
-Generate graphics for VMS games. (actual output not yet tested).
+### aslc86k
+Print [aslc86k](http://mc.pp.se/dc/sw.html) code that can be used in VMU games.
 
 ```
 $ mlcd -a mlcd.bmp
