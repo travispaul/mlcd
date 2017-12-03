@@ -1,4 +1,9 @@
 /* mlcd interface for Lua */
+#define USE_X11 0
+
+#ifdef USE_X11
+#include <X11/Xlib.h>
+#endif
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -11,6 +16,9 @@
 #include <lualib.h>
 
 #include "common.h"
+
+
+#define ZOOM(X) ((X) * (4))
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -54,7 +62,7 @@ bit_array_create(uint16_t nbits) {
 		}
 		bit_array_clear_all(b);
 		return b;
-	}	
+	}
 	return NULL;
 }
 
@@ -63,7 +71,7 @@ bit_array_set_all(bit_array *b) {
 	memset(b->bytes, 0xFF, b->num_of_bytes);
 }
 
-static void 
+static void
 bit_array_print(bit_array *b, FILE* fout) {
 	int i;
 	for (i = 0; i < b->num_of_bytes; i++) {
@@ -93,7 +101,7 @@ static void
 _line(int x0, int y0, int x1, int y1)
 {
 	int dx = abs(x1-x0), sx = x0<x1 ? 1 : -1;
-	int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1; 
+	int dy = abs(y1-y0), sy = y0<y1 ? 1 : -1;
 	int err = (dx>dy ? dx : -dy)/2, e2;
 	for(;;){
 		bit_array_set(frame, (y0 * MLCD_WIDTH) + x0);
@@ -217,7 +225,7 @@ mlcd_save(lua_State *L)
 	int offset;
 	int current;
 	path = lua_tolstring (L, 1, &length);
-	
+
 	for (byte = 0; byte < frame->num_of_bytes; byte++) {
 		for (bit = 0; bit < 8; bit++) {
 			offset = ((byte * 8) + bit) * 3 - 1;
@@ -263,12 +271,57 @@ mlcd_draw(lua_State *L)
 		mssleep = luaL_checkinteger(L, 4);
 	}
 
+#ifdef USE_X11
+
+	Display *d;
+	Window w;
+	XEvent e;
+	int s;
+	int byte;
+	int bit;
+	int offset;
+	int current;
+
+	d = XOpenDisplay(NULL);
+	s = DefaultScreen(d);
+	w = XCreateSimpleWindow(d, RootWindow(d, s), 10, 10, ZOOM(MLCD_WIDTH), ZOOM(MLCD_HEIGHT), 0, BlackPixel(d, s), WhitePixel(d, s));
+
+	XMapWindow(d, w);
+
+	for (;;) {
+		int y = 0;
+		int x = 0;
+		lua_rawgeti(L, LUA_REGISTRYINDEX, draw);
+		lua_pcall(L, 0, 1, 0);
+		for (byte = 0; byte < frame->num_of_bytes; byte++) {
+			for (bit = 0; bit < 8; bit++) {
+				offset = ((byte * 8) + bit);
+				current = frame->bytes[byte] >> (7 - bit) & 1;
+				if(current) {
+					XFillRectangle(d, w, DefaultGC(d, s), ZOOM(x), ZOOM(y), ZOOM(1), ZOOM(1));
+				}
+				x++;
+				if (x == MLCD_WIDTH) {
+					x = 0;
+					y++;
+				}
+			}
+		}
+		XFlush(d);
+		XClearWindow(d, w);
+		usleep ((mssleep == -1) ? 10000 : mssleep);
+	}
+
+	XCloseDisplay(d);
+
+#else
+
 	for (;;) {
 		lua_rawgeti(L, LUA_REGISTRYINDEX, draw);
 		lua_pcall(L, 0, 1, 0);
 		if (path) {
 			f = fopen(path, "a"); // XXX
-			if (f == NULL) { 
+			if (f == NULL) {
 				printf("unable to open file");
 				return 0;
 			}
@@ -285,6 +338,8 @@ mlcd_draw(lua_State *L)
 		}
 		usleep((mssleep == -1) ? 10000 : mssleep);
 	}
+
+#endif
 
 	return 0;
 }

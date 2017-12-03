@@ -24,14 +24,17 @@ The options are:
 .It Fl a
 Print aslc86k code that can be used in VMU games.
 .It Fl b
-Print an ascii binary representation of the image using 1s and 0s.
+Print pixels in the image using 1s and 0s.
 .It Fl c
-Print a C data sctructure that can be embedded into the mlcd(4) driver.
+Print a C data structure that can be embedded into the mlcd(4) driver.
 .It Fl d
-Prints the raw binary data that can be written to an mlcd device.
+Prints the raw binary data that can be written to a mlcd device.
 .El
 .Sh IMAGE FORMATS
-mlcd will read the image file and convert every black pixel in the source image to a corresponding pixel/bit in the output.  The recommended format is a 24bit BMP with only white and black pixels however, stbi also suports the following formats:
+.Nm
+will read the image file and convert every black pixel in the source image
+to a bit in the output.  The recommended format is a 24bit BMP with only white
+and black pixels however, the following formats also work:
 .Bl -tag -width Ds
 .It BMP
 non-1bpp, non-RLE
@@ -41,6 +44,21 @@ non-1bpp, non-RLE
 (*comp always reports as 4-channel)
 .It JPEG
 baseline (no JPEG progressive)
+.Sh EXAMPLES
+Display a BMP on the first Maple LCD connected to the system using the
+.Fl d
+option:
+.Bd -literal
+mlcd -d img.bmp > /dev/mlcd0.0
+.Ed
+.Pp
+To print a "1" or "0" for each pixel in a BMP file use the
+.Fl b
+option:
+.Bd -literal
+mlcd -b img.bmp
+.Ed
+
 .Sh EXIT STATUS
 .Ex -std
 .Sh SEE ALSO
