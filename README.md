@@ -35,7 +35,7 @@ $ lua example.lua
 ![MLCD](test/mlcd.bmp)
 ![MLCD](test/example.bmp)
 
-### ASCII binary 
+### ``-b`` ASCII binary 
 Prints a "#" or " " for each pixel, useful for previewing files.
 
 ```
@@ -73,7 +73,7 @@ $ mlcd -b mlcd.bmp
             #
 ```
 
-### C code
+### ``-c`` C code
 Can be used to replace the default boot image in the [mlcd](https://nxr.netbsd.org/xref/src/sys/arch/dreamcast/dev/maple/mlcd.c#190) NetBSD driver.
 
 ```
@@ -114,7 +114,7 @@ static const char initimg48x32[192] = {
 };
 ```
 
-### aslc86k
+### ``-a`` aslc86k
 Print [aslc86k](http://mc.pp.se/dc/sw.html) code that can be used in VMU games.
 
 ```
